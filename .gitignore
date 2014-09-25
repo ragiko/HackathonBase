@@ -1,0 +1,8 @@
+.dbup/applied/*
+composer.phar
+dbup.phar
+vendor/*
+components/*
+public/config.php
+.dbup/properties.ini
+
