@@ -1,35 +1,6 @@
 <?php
 
-/**
- * Slim と Idiorm をつかたサンプルコード
- *
- * Copyright (c) 2013 maki koiwa
- * This software is released under the MIT License.
- * http://opensource.org/licenses/mit-license.php
- */
-
-require __DIR__ . '/../vendor/autoload.php';
-
-$app = include __DIR__ . '/config.php';
-
-
-/*
- * DBの接続設定
- */
-try {
-    \ORM::configure([
-        'connection_string' => sprintf('%s:host=%s;dbname=%s;port=%d', 
-            'mysql', 
-            $app->container['db.host'], 
-            $app->container['db.database'], 
-            3306),
-        'username' => $app->container['db.user'],
-        'password' => $app->container['db.password'] 
-    ]);
-} catch (Exception $e) {
-    $app->halt(500, $e->getMessage());
-}
-
+require_once __DIR__ . '/../Helper/UserDBHelper.php';
 
 /*
  * トップページ
@@ -41,47 +12,12 @@ $app->get('/', function() use ($app) {
     try {
         $users = \ORM::for_table('users')->find_many();
         $app->view()->setData('users', $users);
-
-
-        $tweets = findTweetByUserName('taguchi');
-        print_r($tweets);
-
-
         $app->view()->display('index.php');
     } catch (Exception $e) {
         $app->halt(500, $e->getMessage());
     }
 });
 
-/*
- * ユーザ名からモデルを取得
- */
-function findByName($name) {
-    $user = ORM::for_table('users')
-        ->where_equal('name', $name)
-        ->find_one();
-
-    return $user;
-}
-
-/*
- * ユーザのtweetを取得
- */
-function findTweetByUserName($user_name) {
-    $tweet_objs = ORM::for_table('tweet')
-        ->select('tweet.*')
-        ->join('users', array(
-            'users.id', '=', 'tweet.user_id'
-        ))
-        ->where_equal('users.name', $user_name)
-        ->find_many();
-
-    $tweets = array_map(function ($x) {
-        return $x->tweet;
-    }, $tweet_objs);
-
-    return $tweets;
-}
 
 /*
  * 詳細
@@ -101,8 +37,6 @@ $app->get('/users/:id', function($id) use ($app) {
 $app->get('/create', function() use ($app) {
     $app->view()->display('create.php');
 });
-
-
 
 /*
  * 新規登録処理
@@ -145,8 +79,6 @@ $app->get('/:id/edit', function($id) use ($app) {
     $app->view()->setData('user', $user);
     $app->view()->display('edit.php');
 });
-
-
 
 /*
  * フォームから POST時
@@ -198,20 +130,12 @@ $app->get('/:id/delete', function($id) use ($app) {
 
 });
 
-
-
 /*
  * phpinfo
  */
 $app->get('/info', function() {
     phpinfo();
 });
-
-
-
-// 実行
-$app->run();
-
 
 /**
  * htmlspecialchars() の便利なラッパー
