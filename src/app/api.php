@@ -26,6 +26,7 @@ $app->get('/api/user/:id', function ($id) use ($jsonResponse) {
     $user = \ORM::for_table('users')
         ->where('id', $id)
         ->find_array();
+
     $jsonResponse($user);
 });
 
