@@ -12,7 +12,7 @@ $app = new \Slim\Slim([
     'log.writer' => new \Slim\LogWriter(fopen('/tmp/app.log', 'a')),
     'log.level' => \Slim\Log::DEBUG,
     'log.enabled' => true,
-    'templates.path' => __DIR__ . '/templates',
+    'templates.path' => __DIR__ . '/views',
 ]);
 
 $app->container['db.host']      = 'localhost';
@@ -36,7 +36,5 @@ try {
 } catch (Exception $e) {
     $app->halt(500, $e->getMessage());
 }
-
-
 
 return $app;
