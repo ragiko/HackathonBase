@@ -41,11 +41,47 @@ $app->get('/', function() use ($app) {
     try {
         $users = \ORM::for_table('users')->find_many();
         $app->view()->setData('users', $users);
+
+
+        $tweets = findTweetByUserName('taguchi');
+        print_r($tweets);
+
+
         $app->view()->display('index.php');
     } catch (Exception $e) {
         $app->halt(500, $e->getMessage());
     }
 });
+
+/*
+ * ユーザ名からモデルを取得
+ */
+function findByName($name) {
+    $user = ORM::for_table('users')
+        ->where_equal('name', $name)
+        ->find_one();
+
+    return $user;
+}
+
+/*
+ * ユーザのtweetを取得
+ */
+function findTweetByUserName($user_name) {
+    $tweet_objs = ORM::for_table('tweet')
+        ->select('tweet.*')
+        ->join('users', array(
+            'users.id', '=', 'tweet.user_id'
+        ))
+        ->where_equal('users.name', $user_name)
+        ->find_many();
+
+    $tweets = array_map(function ($x) {
+        return $x->tweet;
+    }, $tweet_objs);
+
+    return $tweets;
+}
 
 /*
  * 詳細
